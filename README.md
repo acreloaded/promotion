@@ -1,25 +1,24 @@
-**WARNING**: Using this might get you banned. They are known to dislike gameplay mods. Even anti-friendly-fire itself is enough to get you banned.
+**WARNING**: Using this might get you banned. *AC*'s community is known to dislike gameplay mods. Even anti-friendly-fire itself is enough to get banned.
 
-The AssaultCube Reloaded (ACR) Promotion Server (ACP) runs on AssaultCube (AC), but attempts to promote ACR!
+# *ACR* Promotion Server
+The `AssaultCube Reloaded (ACR) Promotion Server` (*ACP*) runs on `AssaultCube` (*AC*), but attempts to promote *ACR*!
 
-This package is for **server operators only**, to run a *promotion server* to convert AC players to ACR.
+This package is for **server operators only**, to run a **promotion server** to advertise *ACR* to *AC* players.
 
-Download and play AssaultCube Reloaded: <https://code.google.com/p/assaultcuber/>
+Download and play *AssaultCube Reloaded*: <http://acr.victorz.ca/>
 
-Server mods include:
+## Server modifications include:
 
- * Feel free to set maxclients to over 20, since it will still work!
- * Automatically adds ACR's name to the server description, so you don't have to
- * Promotes AssaultCube Reloaded every 5-15 seconds (owner-adjustable) via console spam
- * Server always green
- * Moon-jump
- * ACR-like damage fading (but will fade completely in contrast to ACR)
- * Friendly fire returns to user
- * Headshots for all weapons
+ * Feel free to set `-c maxclients` to over 20, since it will still work!
+ * Automatically **adds *ACR*'s name to the server description**, so you don't have to
+ * Promotes *ACR* **every 5-15 seconds (owner-adjustable) via console spam**
+ * Server is **always green**
+ * **Moon-jump**
+ * *ACR*-like **damage fading** (but will fade completely unlike ACR)
+ * **Friendly fire returns** to user
+ * **Headshots** for all weapons
  * ~~256 clients instead of 20~~ This will cause your server to be hidden
- * Spawn with a nade!
+ * When spawning, **start with grenades**!
 
 ## Licence
-A combination of all of the following:
- # You shall not remove our credits
- # GNU GPL v3
+*Cube license* -- see source/README_CUBEENGINE.txt
