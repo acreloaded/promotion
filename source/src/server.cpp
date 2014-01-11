@@ -3745,7 +3745,7 @@ void sendworldstate()
     if(numclients() && servmillis > lastadspam)
     {
         lastadspam = servmillis + scl.spamrate;
-        sendservmsg("\f2Get the \f1full \f0mod\f4: \f3\fbAssaultCube \f5\fbReloaded\f4! \f4(\f1http://\f0\fbacreloaded.tk\f1/\f4)");
+        sendservmsg("\f2Get the \f1full \f0mod\f4: \f3\fbAssaultCube \f5\fbReloaded\f4! \f4(\f1http://\f0\fbacr.victorz.ca\f1/\f4)");
     }
     // [/ACP]
     static enet_uint32 lastsend = 0;
