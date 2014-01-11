@@ -128,7 +128,8 @@ void processevent(client *c, shotevent &e)
                        // knife is now always a 1-hit gib kill
                        damage *= 5;
                     // Trace an estimated head spot
-                    vec virtualhead = vec(.2f, -.25f, .25f);
+                    #define PLAYERHEIGHT 4.5f
+                    vec virtualhead = vec(.2f, -.25f, .25f + PLAYERHEIGHT);
                     virtualhead.rotate_around_z(target->y * RAD);
                     virtualhead.add(target->state.o);
                     // [ACP] Extra sniper/carbine power!
@@ -141,7 +142,7 @@ void processevent(client *c, shotevent &e)
                     newto.sub(e.from).normalize().mul(dist + 8).add(e.from);
                     float dist2;
                     // The actual radius is 0.4, but compensate for lag by having a bigger hitbox
-                    if(intersectsphere(e.from, newto, virtualhead, 4, dist2))
+                    if(intersectsphere(e.from, newto, virtualhead, 1.2f, dist2))
                     {
                         gib = true;
                         damage *= 5;
