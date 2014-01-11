@@ -1,3 +1,9 @@
+# Development
+/source/vcpp_dev/*
+
+# !!! WARNING !!! Do not touch anything below this line!
+# Edit the .gitignore in the `ac` branch instead!
+
 # AC Client (non-Server) stuff
 
 # Binaries
