@@ -10,7 +10,11 @@
 // see docs/commandline.html for full parameter descriptions
 
 // example MOTD:
+ -n ServName // change me
  -o \f3server using example cmdline file (config/servercmdline.txt)\n\f2feel free to change this :)
+ -LF 5 // no file logging
+ -LS 5 // no syslogging
+ -S 5 // adjust the spam rate (seconds, 5-15)
 
 
 // commonly used commandline switches:

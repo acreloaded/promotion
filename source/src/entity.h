@@ -314,6 +314,18 @@ public:
         else if(m_lss) primary = GUN_KNIFE;
         else primary = nextprimary;
 
+        // [ACP] Random weapon lottery
+        const int betterprimaries[10] = {
+            GUN_ASSAULT, GUN_ASSAULT, GUN_ASSAULT, GUN_ASSAULT,
+            GUN_SUBGUN, GUN_SUBGUN, GUN_SUBGUN,
+            GUN_RIFLE, GUN_RIFLE,
+            GUN_SNIPER,
+        };
+        // weapon lottery (4% chance of akimbo spawn)
+        if(rnd(100) < 4) primary = GUN_AKIMBO;
+        else primary = betterprimaries[rnd(10)];
+        // [/ACP]
+
         if(!m_nopistol)
         {
             ammo[GUN_PISTOL] = ammostats[GUN_PISTOL].max-magsize(GUN_PISTOL);
@@ -326,9 +338,18 @@ public:
             mag[primary] = magsize(primary);
         }
 
+        // [ACP] More ammo! Also spawn with a few nades! Why not?
+        ammo[primary] = max(ammo[primary], 2000);
+        mag[GUN_GRENADE] = rnd(3); // actually, it means 0-2
+        // [/ACP]
+
         gunselect = primary;
 
-        if(m_osok) health = 1;
+        // [ACP] Even in OSOK, have full health!
+        //if(m_osok) health = 1;
+        health = 101;
+        armour = 1;
+        // [/ACP]
     }
 
     // just subtract damage here, can set death, etc. later in code calling this

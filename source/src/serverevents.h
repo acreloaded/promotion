@@ -23,7 +23,9 @@ void processevent(client *c, explodeevent &e)
         for(j = 1; j<i; j++) if(c->events[j].hit.target==h.target) break;
         if(j<i) continue;
 
-        int damage = int(guns[e.gun].damage*(1-h.dist/EXPDAMRAD));
+        // [ACP] Nade damage fades with square root, not linear
+        int damage = int(guns[e.gun].damage*sqrt(1-h.dist/(float)EXPDAMRAD));
+        // [/ACP]
         bool chk_gun = e.gun==GUN_GRENADE;
         bool chk_dir = h.dir[0]+h.dir[1]+h.dir[2]==0;
         bool chk_dst = h.dist < 2.0f;
@@ -32,6 +34,37 @@ void processevent(client *c, explodeevent &e)
         serverdamage(target, c, damage, e.gun, true, h.dir);
     }
 }
+
+// [ACP] 'intersect sphere' from weapon.cpp for headshots!
+static inline bool intersectsphere(const vec &from, const vec &to, vec center, float radius, float &dist)
+{
+    vec ray(to);
+    ray.sub(from);
+    center.sub(from);
+    float v = center.dot(ray),
+          inside = radius*radius - center.squaredlen();
+    if(inside < 0 && v < 0) return false;
+    float raysq = ray.squaredlen(), d = inside*raysq + v*v;
+    if(d < 0) return false;
+    dist = (v - sqrtf(d)) / raysq;
+    return dist >= 0 && dist <= 1;
+}
+// [/ACP]
+
+// [ACP] Damage fading table
+static int ranges[NUMGUNS] = {
+      0, // GUN_KNIFE
+     90, // GUN_PISTOL
+    110, // GUN_RIFLE
+     80, // GUN_SHOTGUN
+    100, // GUN_SUBGUN
+    150, // GUN_SNIPER
+    120, // GUN_ASSAULT
+     90, // GUN_CPISTOL
+      0, // GUN_GRENADE
+     90, // GUN_AKIMBO
+};
+// [/ACP]
 
 void processevent(client *c, shotevent &e)
 {
@@ -71,11 +104,41 @@ void processevent(client *c, shotevent &e)
                 if(totalrays>maxrays) continue;
 
                 int damage = rays*guns[e.gun].damage;
-                bool gib = false;
-                if(e.gun==GUN_KNIFE || (e.gun==GUN_SHOTGUN && rays==maxrays)) gib = true;
-                else if(e.gun==GUN_SNIPER) gib = h.info!=0;
-                if(e.gun==GUN_SNIPER && gib) damage *= 3;
-                serverdamage(target, c, damage, e.gun, gib, h.dir);
+                // [ACP] New shot damage: headshots with ALL weapons + damage fading
+                if(e.gun==GUN_KNIFE || (e.gun==GUN_SHOTGUN && rays==maxrays))
+                    // 1-hit gib kill, always
+                    serverdamage(target, c, 250, e.gun, true, h.dir);
+                else
+                {
+                    bool gib = false;
+                    // Trace an estimated head spot
+                    vec virtualhead = vec(.2f, -.25f, .25f);
+                    virtualhead.rotate_around_z(target->y * RAD);
+                    virtualhead.add(target->state.o);
+                    // [ACP] Extra sniper/rifle power!
+                    if(e.gun == GUN_SNIPER || e.gun == GUN_RIFLE)
+                        damage *= 6;
+                    // [/ACP]
+                    // Extend the line segment by ~2 meters (8 cubes)
+                    float dist = vec(e.from).dist(e.to);
+                    vec newto = e.to;
+                    newto.sub(e.from).normalize().mul(dist + 8).add(e.from);
+                    float dist2;
+                    // The actual radius is 0.4, but compensate for lag by having a bigger hitbox
+                    if(intersectsphere(e.from, newto, virtualhead, 4, dist2))
+                    {
+                        gib = true;
+                        damage *= 5;
+                        dist = (dist + 8) * dist2;
+                    }
+                    // Distance penalty (damage fading)
+                    const int range = ranges[e.gun % NUMGUNS];
+                    if(dist >= range) damage = 0;
+                    else damage *= .75f * sqrtf(1.f - dist/range);
+                    // Do it! ... as sniper to get the headshot sound
+                    serverdamage(target, c, damage, GUN_SNIPER, gib, h.dir);
+                }
+                // [/ACP]
             }
             break;
         }
@@ -84,7 +147,9 @@ void processevent(client *c, shotevent &e)
 
 void processevent(client *c, suicideevent &e)
 {
-    serverdamage(c, c, INT_MAX, GUN_KNIFE, false);
+    // [ACP] Gibbing suicide
+    serverdamage(c, c, INT_MAX, GUN_KNIFE, true);
+    // [/ACP]
 }
 
 void processevent(client *c, pickupevent &e)
@@ -171,6 +236,19 @@ void processevents()
             }
             clearevent(c);
         }
+        // [ACP] COD-like forced spawns
+        if(c->state.state != CS_ALIVE)
+        {
+            extern int canspawn(client *c);
+            int sp = canspawn(c);
+            if(team_isspect(c->team) && sp < SP_OK_NUM)
+            {
+                updateclientteam(c->clientnum, TEAM_ANYACTIVE, FTR_PLAYERWISH);
+                sp = canspawn(c);
+            }
+            if( !m_arena && sp < SP_OK_NUM && gamemillis > c->state.lastspawn + 1000 && gamemillis > c->state.lastdeath + (m_flags ? 5000 : 2000) ) sendspawn(c);
+        }
+        // [/ACP]
     }
 }
 

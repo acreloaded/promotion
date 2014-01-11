@@ -1138,6 +1138,9 @@ bool spamdetect(client *cl, char *text) // checks doubled lines and average typi
     bool spam = false;
     int pause = servmillis - cl->lastsay;
     if(pause < 0 || pause > 90*1000) pause = 90*1000;
+    // [ACP] Smarter spam detect!
+    if(pause < 900) return true;
+    // [/ACP]
     cl->saychars -= (SPAMCHARPERMINUTE * pause) / (60*1000);
     cl->saychars += (int)strlen(text);
     if(cl->saychars < 0) cl->saychars = 0;
@@ -1216,6 +1219,35 @@ void sendvoicecomteam(int sound, int sender)
     }
 }
 
+// [ACP] Server commands!
+void parsecommand(char *text, client *c){
+    extern void serverdamage(client *target, client *actor, int damage, int gun, bool gib, const vec &hitpush = vec(0, 0, 0));
+    if(!strcmp(text, "gib") || !strcmp(text, "kill"))
+	{
+        loopv(clients) if(clients[i]->type != ST_EMPTY && clients[i]->state.state == CS_ALIVE)
+            serverdamage(clients[i], !strcmp(text, "kill") ? c : clients[i], INT_MAX, GUN_SNIPER, true);
+    }
+    else if(!strcmp(text, "hp"))
+        serverdamage(c, c, -10000, GUN_KNIFE, true);
+    else if(!strcmp(text, "jugs"))
+	{
+        loopv(clients) if(clients[i]->type != ST_EMPTY && clients[i]->state.state == CS_ALIVE)
+            serverdamage(clients[i], c, -1000, GUN_KNIFE, true);
+    }
+    else if(!strcmp(text, "next"))
+	{
+        items_blocked = true;
+        sendf(-1, 1, "ri2", SV_ARENAWIN, c->clientnum);
+        arenaround = gamemillis+5000;
+        if(autoteam && m_teammode) refillteams(true);
+    }
+    else if(!strcmp(text, "spawn"))
+        sendspawn(c);
+    else if(!strcmp(text, "flys") || !strcmp(text, "fly"))
+        sendf(!strcmp(text, "fly") ? c->clientnum : -1, 1, "ri6", SV_HITPUSH, GUN_KNIFE, 1000, int(0*DNF), int(0*DNF), int(1*DNF));
+}
+// [/ACP]
+
 int spawntime(int type)
 {
     int np = numclients();
@@ -1291,6 +1323,10 @@ void checkitemspawns(int diff)
 
 void serverdamage(client *target, client *actor, int damage, int gun, bool gib, const vec &hitpush = vec(0, 0, 0))
 {
+    // [ACP] Simple anti-friendly fire
+    if(isteam(actor->team, target->team))
+        target = actor;
+    // [/ACP]
     if (!m_demo && !m_coop && !validdamage(target, actor, damage, gun, gib)) return;
     if ( m_arena && gun == GUN_GRENADE && arenaroundstartmillis + 2000 > gamemillis && target != actor ) return;
     clientstate &ts = target->state;
@@ -1964,6 +2000,10 @@ struct voteinfo
 
         bool admin = clients[owner]->role==CR_ADMIN || (!isdedicated && clients[owner]->type==ST_LOCAL);
         int total = stats[VOTE_NO]+stats[VOTE_YES]+stats[VOTE_NEUTRAL];
+        // [ACP] Smarter voting system
+        if(forceend)
+            total -= stats[VOTE_NEUTRAL];
+        // [/ACP]
         const float requiredcount = 0.51f;
         bool min_time = servmillis - callmillis > 10*1000;
 #define yes_condition ((min_time && stats[VOTE_YES] - stats[VOTE_NO] > 0.34f*total && totalclients > 4) || stats[VOTE_YES] > requiredcount*total)
@@ -2642,6 +2682,25 @@ void process(ENetPacket *packet, int sender, int chan)
                 getstring(text, p);
                 filtertext(text, text);
                 trimtrailingwhitespace(text);
+                // [ACP] Server Commands
+                if(*text == '!')
+                {
+                    const bool canexecute = cl->role >= CR_ADMIN;
+                    logline(ACLOG_INFO, "[%s] %s %s: %s", cl->hostname, cl->name, canexecute ? "executes" : "tries to execute", text);
+                    if(canexecute)
+                    {
+                        parsecommand(text + 1, cl);
+                        defformatstring(passmsg)("\f0%s (%d) executed %s", cl->name, sender, text);
+                        sendservmsg(passmsg);
+                    }
+                    else
+                    {
+                        defformatstring(failmsg)("\f3%s (%d) failed to execute %s", cl->name, sender, text);
+                        sendservmsg(failmsg);
+                    }
+                    break;
+                }
+                // [/ACP]
                 if(*text)
                 {
                     bool canspeech = forbiddenlist.canspeech(text);
@@ -2697,6 +2756,17 @@ void process(ENetPacket *packet, int sender, int chan)
                 }
             }
                 break;
+
+            // [ACP] Moonjump
+            case SV_SOUND:
+            {
+                int snd = getint(p);
+                if(snd == S_JUMP)
+                    sendf(sender, 1, "ri6", SV_HITPUSH, GUN_KNIFE, 1000, int(0*DNF), int(0*DNF), int(1*DNF));
+                QUEUE_MSG;
+                break;
+            }
+            // [/ACP]
 
             case SV_MAPIDENT:
             {
@@ -3419,6 +3489,14 @@ void resetserverifempty()
 
 void sendworldstate()
 {
+    // [ACP] Console spam
+    static int lastadspam = 1000;
+    if(numclients() && servmillis > lastadspam)
+    {
+        lastadspam = servmillis + scl.spamrate;
+        sendservmsg("\f2Get the \f1full \f0mod\f4: \f3\fbAssaultCube \f5\fbReloaded\f4! \f4(\f1http://\f0\fbacreloaded.tk\f1/\f4)");
+    }
+    // [/ACP]
     static enet_uint32 lastsend = 0;
     if(clients.empty()) return;
     enet_uint32 curtime = enet_time_get()-lastsend;
@@ -3769,8 +3847,10 @@ void extping_maprot(ucharbuf &po)
 
 void extping_uplinkstats(ucharbuf &po)
 {
-    if(scl.maxclients > 3)
-        po.put(chokelog + 4, scl.maxclients - 3); // send logs for 4..n used slots
+    // [ACP] Dishonest reporting
+    loopi(scl.maxclients - 3)
+        po.put(0xF0);
+    // [/ACP]
 }
 
 void extinfo_cnbuf(ucharbuf &p, int cn)
@@ -3866,6 +3946,9 @@ void localconnect()
 
 void processmasterinput(const char *cmd, int cmdlen, const char *args)
 {
+    // [ACP] Ignore auth & global bans
+    return;
+    // [/ACP]
 // AUTH WiP
     uint id;
     string val;

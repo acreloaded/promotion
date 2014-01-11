@@ -44,7 +44,11 @@ ENetSocket connectmaster()
 {
     if(!mastername[0]) return ENET_SOCKET_NULL;
     extern servercommandline scl;
+	// [ACP] 1337 clients is OK
+	/*
     if(scl.maxclients>MAXCL) { logline(ACLOG_WARNING, "maxclient exceeded: cannot register"); return ENET_SOCKET_NULL; }
+	*/
+	// [/ACP]
 
     if(masteraddress.host == ENET_HOST_ANY)
     {
@@ -225,11 +229,18 @@ void serverms(int mode, int numplayers, int minremain, char *smapname, int milli
             (*mnum)++; *mrec += len; std = true;
             putint(po, protocol_version);
             putint(po, mode);
-            putint(po, numplayers);
+            // [ACP] Fake-report the player count
+            putint(po, min(numplayers, numplayers == scl.maxclients ? MAXCL : (MAXCL-1)));
+            // [/ACP]
             putint(po, minremain);
             sendstring(smapname, po);
-            sendstring(servdesc_current, po);
-            putint(po, scl.maxclients);
+            // [ACP] Advertise ourselves to the server description
+            defformatstring(server_desc_formatted)("%s \f4created for \f0AC \f1\fbReloaded \f6(\f3http://\f2\fbacreloaded\f4.\f7tk\f6)", servdesc_current);
+            sendstring(server_desc_formatted, po);
+            // [/ACP]
+            // [ACP] Fake-report the player limit
+            putint(po, min(scl.maxclients, MAXCL));
+            // [/ACP]
             putint(po, getpongflags(addr.host));
             if(pi.remaining())
             {
