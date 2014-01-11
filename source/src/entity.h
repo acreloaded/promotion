@@ -342,7 +342,7 @@ public:
         const int betterprimaries[10] = {
             GUN_ASSAULT, GUN_ASSAULT, GUN_ASSAULT, GUN_ASSAULT,
             GUN_SUBGUN, GUN_SUBGUN, GUN_SUBGUN,
-            GUN_RIFLE, GUN_RIFLE,
+            GUN_CARBINE, GUN_CARBINE,
             GUN_SNIPER,
         };
         // weapon lottery (4% chance of akimbo spawn)

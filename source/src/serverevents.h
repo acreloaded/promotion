@@ -55,7 +55,7 @@ static inline bool intersectsphere(const vec &from, const vec &to, vec center, f
 static int ranges[NUMGUNS] = {
       0, // GUN_KNIFE
      90, // GUN_PISTOL
-    110, // GUN_RIFLE
+    110, // GUN_CARBINE
      80, // GUN_SHOTGUN
     100, // GUN_SUBGUN
     150, // GUN_SNIPER
@@ -131,8 +131,8 @@ void processevent(client *c, shotevent &e)
                     vec virtualhead = vec(.2f, -.25f, .25f);
                     virtualhead.rotate_around_z(target->y * RAD);
                     virtualhead.add(target->state.o);
-                    // [ACP] Extra sniper/rifle power!
-                    if(e.gun == GUN_SNIPER || e.gun == GUN_RIFLE)
+                    // [ACP] Extra sniper/carbine power!
+                    if(e.gun == GUN_SNIPER || e.gun == GUN_CARBINE)
                         damage *= 5;
                     // [/ACP]
                     // Extend the line segment by ~2 meters (8 cubes)
@@ -145,7 +145,7 @@ void processevent(client *c, shotevent &e)
                     {
                         gib = true;
                         damage *= 5;
-						e.gun = GUN_SNIPER; // as sniper to get the headshot sound
+                        e.gun = GUN_SNIPER; // as sniper to get the headshot sound
                         dist = (dist + 8) * dist2;
                     }
                     // Distance penalty (damage fading)
