@@ -6,6 +6,7 @@
 
 # Configs
 /config/*
+!/config/convert_mapconfig.sh
 !/config/forbidden.cfg
 !/config/maprot.cfg
 !/config/motd_en.txt
@@ -13,6 +14,7 @@
 !/config/serverblacklist.cfg
 !/config/servercmdline.txt
 !/config/serverinfo_en.txt
+!/config/serverkillmessages.cfg
 !/config/serverpwd.cfg
 
 # Packages
@@ -25,12 +27,13 @@
 /demos/*
 /docs/*
 /mods/*
+/scripts/*
 /screenshots/
 /assaultcube.bat
 /assaultcube.sh
 /assaultcube_release.bat
-/icon.ico
 /install_desktop_menu.sh
+/changelog.txt
 /README.html
 
 # Client source files
@@ -75,6 +78,7 @@
 /source/src/soundscheduler.cpp
 /source/src/texture.cpp
 /source/src/tristrip.h
+/source/src/varray.h
 /source/src/vertmodel.h
 /source/src/water.cpp
 /source/src/weapon.cpp
@@ -84,4 +88,3 @@
 /source/src/worldocull.cpp
 /source/src/worldrender.cpp
 /source/src/zip.cpp
-/source/vcpp/SDL_win32_main.cpp
