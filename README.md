@@ -14,7 +14,7 @@ Download and play *AssaultCube Reloaded*: <http://acr.victorz.ca/>
  * Promotes *ACR* **every 5-15 seconds (owner-adjustable) via console spam**
  * Server is **always green**
  * **Moon-jump**
- * *ACR*-like **damage fading** (but will fade completely unlike ACR)
+ * **Damage fading** similar to *ACR*
  * **Friendly fire returns** to user
  * **Headshots** for all weapons
  * ~~256 clients instead of 20~~ This will cause your server to be hidden

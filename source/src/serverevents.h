@@ -117,7 +117,7 @@ void processevent(client *c, shotevent &e)
                     virtualhead.add(target->state.o);
                     // [ACP] Extra sniper/rifle power!
                     if(e.gun == GUN_SNIPER || e.gun == GUN_RIFLE)
-                        damage *= 6;
+                        damage *= 5;
                     // [/ACP]
                     // Extend the line segment by ~2 meters (8 cubes)
                     float dist = vec(e.from).dist(e.to);
@@ -133,8 +133,9 @@ void processevent(client *c, shotevent &e)
                     }
                     // Distance penalty (damage fading)
                     const int range = ranges[e.gun % NUMGUNS];
-                    if(dist >= range) damage = 0;
-                    else damage *= .75f * sqrtf(1.f - dist/range);
+                    // Cut-off is at half damage
+                    if(dist >= (range*3)>>2) damage /= 2;
+                    else damage *= sqrtf(1.f - dist/range);
                     // Do it! ... as sniper to get the headshot sound
                     serverdamage(target, c, damage, GUN_SNIPER, gib, h.dir);
                 }
