@@ -161,6 +161,55 @@ void processevent(client *c, shotevent &e)
                 if(totalrays>maxrays) continue;
                 serverdamage(target, c, damage, e.gun, gib, h.dir);
             }
+            // [ACP] Explosive ammo
+            static uchar buf[MAXTRANS];
+            ucharbuf p(buf, MAXTRANS);
+            putint(p, SV_THROWNADE);
+            putint(p, int(e.to[0]*DMF));
+            putint(p, int(e.to[1]*DMF));
+            putint(p, int(e.to[2]*DMF));
+            putint(p, 0);
+            putint(p, 0);
+            putint(p, 0);
+            putint(p, 2000);
+            if(numclients() >= 2)
+            {
+                sendf(-1, 1, "ri3mx", SV_CLIENT, c->clientnum, p.length(), p.length(), p.buf, c->clientnum);
+                ucharbuf p(buf, MAXTRANS);
+                putint(p, SV_THROWNADE);
+                putint(p, int(e.to[0]*DMF));
+                putint(p, int(e.to[1]*DMF));
+                putint(p, int(e.to[2]*DMF));
+                putint(p, 0);
+                putint(p, 0);
+                putint(p, 0);
+                putint(p, 2000);
+                int found = c->clientnum;
+                loopv(clients)
+                {
+                    if(i != found && clients[i]->type != ST_EMPTY)
+                    {
+                        found = i;
+                        break;
+                    }
+                }
+                sendf(c->clientnum, 1, "ri3m", SV_CLIENT, found, p.length(), p.length(), p.buf);
+            }
+            else
+            {
+                sendf(-1, 1, "ri3m", SV_CLIENT, c->clientnum, p.length(), p.length(), p.buf);
+            }
+            loopv(clients)
+            {
+                if(clients[i]->type == ST_EMPTY || clients[i]->state.state != CS_ALIVE)
+                    continue;
+                vec to(e.to);
+                float dist = vec(clients[i]->state.o.x, clients[i]->state.o.y, clients[i]->state.o.z + PLAYERHEIGHT).dist(to);
+                if(dist > 16)
+                    continue;
+                serverdamage(clients[i], c, (e.gun == GUN_SHOTGUN ? 95 : guns[e.gun].damage) * sqrt(1 - dist/16), GUN_SNIPER, true);
+            }
+            // [/ACP]
             break;
         }
     }
