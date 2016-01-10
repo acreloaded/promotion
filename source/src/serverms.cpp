@@ -236,7 +236,7 @@ void serverms(int mode, int numplayers, int minremain, char *smapname, int milli
             putint(po, minremain);
             sendstring(smapname, po);
             // [ACP] Advertise ourselves to the server description
-            defformatstring(server_desc_formatted)("%s \f4created for \f0AC \f1\fbReloaded \f6(\f3http://\f2\fbacr.victorz\f4\fb.\f7\fbca\f6)", servdesc_current);
+            defformatstring(server_desc_formatted)("%s \f4modded by \f0AC \f1\fbReloaded \f6(\f3http://\f2\fbacr.victorz\f4\fb.\f7\fbca\f6)", servdesc_current);
             sendstring(server_desc_formatted, po);
             // [/ACP]
             // [ACP] Fake-report the player limit
