@@ -16,7 +16,7 @@
  -LS 5 // no syslogging
  -S 5 // adjust the spam rate (seconds, 5-15)
  -c 200 // because why not?
- -P Ks // disallow kicks
+ -P KBs // disallow kicks
 
 
 // commonly used commandline switches:
