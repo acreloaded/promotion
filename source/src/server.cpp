@@ -3112,6 +3112,9 @@ void process(ENetPacket *packet, int sender, int chan)
             case SV_SWITCHTEAM:
             {
                 int t = getint(p);
+                // [ACP] No switching to SPECTATORs
+                if(team_isspect(t)) break;
+                // [/ACP]
                 if(!updateclientteam(sender, team_isvalid(t) ? t : TEAM_SPECT, FTR_PLAYERWISH)) sendf(sender, 1, "rii", SV_TEAMDENY, t);
                 break;
             }
