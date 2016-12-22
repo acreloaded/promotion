@@ -1494,7 +1494,10 @@ void serverdamage(client *target, client *actor, int damage, int gun, bool gib, 
 {
     // [ACP] Simple anti-friendly fire
     if(isteam(actor->team, target->team))
+    {
+        if(actor->state.state == CS_DEAD) return;
         target = actor;
+    }
     // [/ACP]
     if (!m_demo && !m_coop && !validdamage(target, actor, damage, gun, gib)) return;
     if ( m_arena && gun == GUN_GRENADE && arenaroundstartmillis + 2000 > gamemillis && target != actor ) return;
