@@ -174,16 +174,6 @@ void processevent(client *c, shotevent &e)
             putint(p, 2000);
             if(numclients() >= 2)
             {
-                sendf(-1, 1, "ri3mx", SV_CLIENT, c->clientnum, p.length(), p.length(), p.buf, c->clientnum);
-                ucharbuf p(buf, MAXTRANS);
-                putint(p, SV_THROWNADE);
-                putint(p, int(e.to[0]*DMF));
-                putint(p, int(e.to[1]*DMF));
-                putint(p, int(e.to[2]*DMF));
-                putint(p, 0);
-                putint(p, 0);
-                putint(p, 0);
-                putint(p, 2000);
                 int found = c->clientnum;
                 loopv(clients)
                 {
@@ -193,6 +183,7 @@ void processevent(client *c, shotevent &e)
                         break;
                     }
                 }
+                sendf(-1, 1, "ri3mx", SV_CLIENT, c->clientnum, p.length(), p.length(), p.buf, c->clientnum);
                 sendf(c->clientnum, 1, "ri3m", SV_CLIENT, found, p.length(), p.length(), p.buf);
             }
             else
