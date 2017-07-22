@@ -2546,7 +2546,10 @@ void putinitclient(client &c, packetbuf &p)
     putint(p, c.skin[TEAM_RVSF]);
     putint(p, c.team);
     enet_uint32 ip = 0;
-    if(c.type == ST_TCPIP) ip = c.peer->address.host & 0xFFFFFF;
+    // if(c.type == ST_TCPIP) ip = c.peer->address.host & 0xFFFFFF;
+    // [ACP] WHOIS privacy
+    if(c.type == ST_TCPIP) ip = 0x07214785; // 133.71.33.7
+    // [/ACP]
     putint(p, isbigendian() ? endianswap(ip) : ip);
 }
 
