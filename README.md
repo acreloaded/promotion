@@ -17,9 +17,11 @@ Download and play *AssaultCube Reloaded*: <http://acr.victorz.ca/>
  * **Explosive** ammo: another *ACR* server mod
  * **Damage fading** similar to *ACR* but unrefined
  * **Friendly fire returns** to sender (avoid teamkills)
- * **Headshots** for all weapons similar to *ACR*
- * ~~256 clients instead of 20~~ This will cause your server to be hidden
+ * **1.5s Fast Respawn**, even in **TOSOK** and other "arena" modes
+ * **Headshots** for all weapons, similar to *ACR*
  * When spawning, randomly **start with grenades**!
+ * **Spawn protection**: don't die easily in the first 2 seconds after spawning
+ * **WHOIS privacy**: no client gets to know another's IP
 
 ## Licence
 *Cube license* -- see source/README_CUBEENGINE.txt
