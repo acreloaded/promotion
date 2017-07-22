@@ -1499,6 +1499,12 @@ void serverdamage(client *target, client *actor, int damage, int gun, bool gib, 
         target = actor;
     }
     // [/ACP]
+    // [ACP] Spawn protection
+    if (damage > 1 && gamemillis < target->state.spawn + 2000)
+    {
+        damage = 1;
+    }
+    // [/ACP]
     if (!m_demo && !m_coop && !validdamage(target, actor, damage, gun, gib)) return;
     if ( m_arena && gun == GUN_GRENADE && arenaroundstartmillis + 2000 > gamemillis && target != actor ) return;
     clientstate &ts = target->state;
