@@ -299,7 +299,7 @@ void processevents()
                 updateclientteam(c->clientnum, TEAM_ANYACTIVE, FTR_PLAYERWISH);
                 sp = canspawn(c);
             }
-            if( !m_arena && sp < SP_OK_NUM && gamemillis > c->state.lastspawn + 1000 && gamemillis > c->state.lastdeath + (m_flags ? 5000 : 2000) ) sendspawn(c);
+            if( sp < SP_OK_NUM && gamemillis > c->state.lastspawn + 1000 && gamemillis > c->state.lastdeath + 1500 ) sendspawn(c);
         }
         // [/ACP]
     }
